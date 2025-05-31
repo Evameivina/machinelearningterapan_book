@@ -99,8 +99,6 @@ Dataset ini terdiri dari beberapa file utama, antara lain:
 
 Sebagian kolom seperti `isbn`, `original_title`, dan `language_code` mengandung nilai kosong (`NaN`), sehingga perlu diperhatikan dalam proses preprocessing.
 
-# Proyek Machine Learning: Rekomendasi Buku
-
 ## Data Preparation
 
 Pada tahap ini, dilakukan beberapa teknik persiapan data (data preparation) untuk memastikan kualitas data yang baik dan konsisten sebelum melanjutkan ke tahap modeling. Teknik data preparation yang dilakukan, antara lain:
@@ -141,7 +139,6 @@ Pada tahap ini, dilakukan beberapa teknik persiapan data (data preparation) untu
 ### Alasan Tahapan Data Preparation:
 - **Pemeriksaan struktur data** penting untuk mengetahui apakah terdapat data yang hilang, outlier, atau format tidak konsisten.
 - **Penggabungan data unik** diperlukan untuk membangun matriks interaksi pengguna-buku yang komprehensif, yang akan digunakan dalam sistem rekomendasi.
-
 
 ## Modeling
 
