@@ -100,4 +100,125 @@ Dataset ini terdiri dari beberapa file utama, antara lain:
 
 Sebagian kolom seperti `isbn`, `original_title`, dan `language_code` mengandung nilai kosong (`NaN`), sehingga perlu diperhatikan dalam proses preprocessing.
 
-ces][['title', 'authors']]
+# Proyek Machine Learning: Rekomendasi Buku
+
+## Data Preparation
+
+Pada tahap ini, dilakukan beberapa teknik persiapan data (data preparation) untuk memastikan kualitas data yang baik dan konsisten sebelum melanjutkan ke tahap modeling. Teknik data preparation yang dilakukan, antara lain:
+
+1. **Pemeriksaan Struktur Data**
+   - Melihat ukuran dataset `ratings` dan `books` untuk memahami skala data:
+     ```python
+     print(ratings.shape)  # (981756, 3)
+     print(books.shape)    # (10000, 23)
+     ```
+   - Melihat preview data dan statistik deskriptif untuk mengevaluasi struktur dan distribusi data.
+
+2. **Cek Jumlah Unik**
+   - Menghitung jumlah pengguna (`user_id`) dan jumlah buku (`book_id`) unik:
+     ```python
+     print('Jumlah user_id (pengguna): ', len(ratings.user_id.unique()))
+     print('Jumlah book_id (buku): ', len(ratings.book_id.unique()))
+     ```
+
+3. **Gabungan Data Buku**
+   - Menggabungkan seluruh `book_id` dari beberapa sumber dataset (`books`, `ratings`, `book_tags`, `to_read`) untuk mendapatkan daftar buku unik:
+     ```python
+     books_all = np.concatenate((
+         books.book_id.unique(),
+         ratings.book_id.unique(),
+         book_tags.goodreads_book_id.unique(),
+         to_read.book_id.unique()
+     ))
+     books_all = np.sort(np.unique(books_all))
+     ```
+
+4. **Gabungan Data Pengguna**
+   - Menggabungkan seluruh `user_id` unik dari dataset `ratings`:
+     ```python
+     user_all = np.sort(np.unique(ratings.user_id.unique()))
+     ```
+
+### Alasan Tahapan Data Preparation:
+- **Pemeriksaan struktur data** penting untuk mengetahui apakah terdapat data yang hilang, outlier, atau format tidak konsisten.
+- **Penggabungan data unik** diperlukan untuk membangun matriks interaksi pengguna-buku yang komprehensif, yang akan digunakan dalam sistem rekomendasi.
+
+
+## Modeling
+
+Tahapan modeling pada proyek ini menggunakan pendekatan **Collaborative Filtering berbasis Neural Network** untuk membangun sistem rekomendasi buku. Algoritma yang digunakan adalah arsitektur custom berbasis **Embedding Layers dan Dot Product** menggunakan **TensorFlow Keras**.
+
+### Tahapan Modeling
+
+1. **Encoding Identitas**
+   - Data ID pengguna dan buku diubah ke bentuk numerik menggunakan `LabelEncoder`, agar dapat digunakan dalam embedding.
+
+2. **Pembuatan Label**
+   - Rating dikonversi menjadi label biner:
+     - `1` jika rating ≥ 4 (suka)
+     - `0` jika rating < 4 (tidak suka)
+
+3. **Splitting Data**
+   - Data dibagi menjadi 80% data latih dan 20% data validasi menggunakan `train_test_split` dengan stratifikasi.
+
+4. **Arsitektur Model**
+   - Model `RecommenderNet` terdiri dari:
+     - **Embedding Layer** untuk user dan book
+     - **Bias Embedding** untuk user dan book
+     - **Dot Product** sebagai skor interaksi
+     - **Dropout Layer** untuk regularisasi
+     - **Output Layer**: aktivasi sigmoid
+
+5. **Parameter dan Hyperparameter**
+   - Embedding size: 64
+   - Loss function: Binary Crossentropy
+   - Optimizer: Adam (`learning_rate = 5e-5`)
+   - Metrics: Accuracy, AUC, RMSE
+   - Callbacks:
+     - `EarlyStopping` (monitor: val_auc, patience: 5)
+     - `ReduceLROnPlateau` (monitor: val_auc, factor: 0.5, patience: 3)
+
+6. **Training**
+   - Model dilatih selama maksimum 40 epoch dengan batch size 256.
+
+### Kelebihan Model
+
+- Mampu menangkap hubungan laten antar user dan buku.
+- Flexible untuk dilakukan improvement (misalnya tuning embedding size, dropout, dsb).
+- Tidak membutuhkan fitur konten buku secara eksplisit.
+
+### Kekurangan Model
+
+- Tidak bekerja optimal pada user/buku baru (cold-start problem).
+- Membutuhkan cukup banyak data interaksi untuk hasil optimal.
+
+---
+
+## Evaluation
+
+### Metrik Evaluasi
+
+Proyek ini menggunakan metrik berikut:
+
+| Metrik               | Deskripsi                                                                 |
+|----------------------|--------------------------------------------------------------------------|
+| **Accuracy**         | Proporsi prediksi yang benar dari semua prediksi                        |
+| **AUC (ROC Curve)**  | Kemampuan model membedakan antara kelas 1 dan 0                          |
+| **RMSE**             | Root Mean Squared Error untuk prediksi probabilitas                     |
+| **Precision, Recall, F1** | Dari `classification_report` untuk melihat keseimbangan model terhadap data imbang/tidak imbang |
+
+### Hasil Evaluasi
+
+- **Akurasi Validasi Terbaik**: ~70.6%
+- **AUC Validasi Terbaik**: ~0.7277
+- **Confusion Matrix & Classification Report** menunjukkan performa cukup seimbang antara prediksi suka dan tidak suka.
+- **ROC Curve** menghasilkan AUC 0.7277, yang menunjukkan kemampuan klasifikasi model cukup baik meski masih bisa ditingkatkan.
+
+### Penutup
+
+Model ini dipilih sebagai solusi terbaik karena:
+
+- Memiliki hasil evaluasi yang stabil dan membaik pada tiap epoch awal.
+- AUC dan akurasi meningkat secara bertahap tanpa overfitting berkat penggunaan early stopping dan regulasi.
+- Model cukup sederhana untuk di-deploy dan dikembangkan lebih lanjut (misalnya dengan peningkatan embedding atau hybrid filtering).
+
