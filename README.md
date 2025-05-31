@@ -78,7 +78,6 @@ Dataset ini terdiri dari beberapa file utama, antara lain:
 | 1       | 1169    | 4      |
 | 1       | 1185    | 4      |
 
----
 
 ### Struktur dan Tipe Data `books.csv`
 
@@ -192,7 +191,6 @@ Tahapan modeling pada proyek ini menggunakan pendekatan **Collaborative Filterin
 - Tidak bekerja optimal pada user/buku baru (cold-start problem).
 - Membutuhkan cukup banyak data interaksi untuk hasil optimal.
 
----
 
 ## Evaluation
 
