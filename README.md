@@ -2,19 +2,9 @@
 
 ## Domain Proyek
 
-# Sistem Rekomendasi Buku - Goodbooks-10k
+Sistem Rekomendasi Buku - Goodbooks-10k
 
-## Latar Belakang Proyek
-
-Proyek ini bertujuan untuk membangun sistem rekomendasi buku menggunakan dataset **Goodbooks-10k** yang tersedia di platform Kaggle. Dataset ini mencakup informasi lebih dari 10.000 buku, termasuk rating pengguna, tag, serta metadata seperti judul, penulis, tahun terbit, dan bahasa. Melalui proyek ini, dilakukan eksplorasi dan analisis data untuk memahami karakteristik buku dan preferensi pengguna, dengan tujuan akhir mengembangkan sistem rekomendasi yang mampu menyajikan rekomendasi buku secara personal dan relevan.
-
-Kebutuhan akan sistem rekomendasi yang efektif semakin meningkat, terutama dalam era digital saat ini, di mana pengguna dihadapkan pada begitu banyak pilihan. Sistem rekomendasi memainkan peran penting dalam membantu pengguna menemukan konten yang sesuai dengan preferensi mereka, serta meningkatkan pengalaman pengguna secara keseluruhan. 
-
-Menurut riset oleh Zhang et al. (2019), sistem rekomendasi terbukti mampu meningkatkan interaksi pengguna dan mendorong penjualan pada berbagai platform digital, termasuk platform literasi dan e-commerce buku.
-
-**Referensi:**  
-Zhang, S., Yao, L., Sun, A., & Tay, Y. (2019). *Deep Learning based Recommender System: A Survey and New Perspectives.* ACM Computing Surveys (CSUR), 52(1), 1-38.  
-DOI: [https://doi.org/10.1145/3285029](https://doi.org/10.1145/3285029)
+## Business Understanding
 
 ### Problem Statements
 1. Bagaimana memberikan rekomendasi buku berdasarkan kemiripan konten (judul dan deskripsi)?
@@ -28,6 +18,18 @@ DOI: [https://doi.org/10.1145/3285029](https://doi.org/10.1145/3285029)
 
 - **Solution 1**: Menggunakan *TF-IDF Vectorization* pada fitur teks (judul/deskripsi) dan mengukur *cosine similarity* antar buku.
 - **Solution 2 (opsional)**: Sistem berbasis *collaborative filtering* menggunakan matrix rating pengguna (tidak diterapkan penuh dalam notebook ini, tapi dapat dikembangkan).
+
+## Latar Belakang Proyek
+
+Proyek ini bertujuan untuk membangun sistem rekomendasi buku menggunakan dataset **Goodbooks-10k** yang tersedia di platform Kaggle. Dataset ini mencakup informasi lebih dari 10.000 buku, termasuk rating pengguna, tag, serta metadata seperti judul, penulis, tahun terbit, dan bahasa. Melalui proyek ini, dilakukan eksplorasi dan analisis data untuk memahami karakteristik buku dan preferensi pengguna, dengan tujuan akhir mengembangkan sistem rekomendasi yang mampu menyajikan rekomendasi buku secara personal dan relevan.
+
+Kebutuhan akan sistem rekomendasi yang efektif semakin meningkat, terutama dalam era digital saat ini, di mana pengguna dihadapkan pada begitu banyak pilihan. Sistem rekomendasi memainkan peran penting dalam membantu pengguna menemukan konten yang sesuai dengan preferensi mereka, serta meningkatkan pengalaman pengguna secara keseluruhan.
+
+Menurut riset oleh Zhang et al. (2019), sistem rekomendasi terbukti mampu meningkatkan interaksi pengguna dan mendorong penjualan pada berbagai platform digital, termasuk platform literasi dan e-commerce buku.
+
+**Referensi:**  
+Zhang, S., Yao, L., Sun, A., & Tay, Y. (2019). *Deep Learning based Recommender System: A Survey and New Perspectives.* ACM Computing Surveys (CSUR), 52(1), 1-38.  
+DOI: [https://doi.org/10.1145/3285029](https://doi.org/10.1145/3285029)
 
 ## Data Understanding
 
@@ -124,7 +126,6 @@ File ini berisi daftar buku yang ditandai pengguna untuk dibaca di masa depan.
     
 ### 5. sample_book.xml  
 File ini merupakan file tambahan yang tidak digunakan dalam analisis ini.
-
 
 ## Data Preparation
 
@@ -267,8 +268,6 @@ Tahapan modeling pada proyek ini menggunakan pendekatan **Collaborative Filterin
 - Membutuhkan cukup banyak data interaksi untuk hasil optimal.
 
 
-## Evaluation
-
 ## Modeling
 
 Pada proyek ini, sistem rekomendasi buku dikembangkan menggunakan dua pendekatan utama, yaitu **Content-Based Filtering** dan **Collaborative Filtering berbasis Neural Network**. 
@@ -366,12 +365,17 @@ Misal, untuk pengguna dengan ID tertentu, Top-5 rekomendasi buku yang diprediksi
 | 4800764  | Sweet Persuasion                | 0.80            |
 
 
+
+## Evaluation
 ### Hasil Evaluasi
 
-- **Akurasi Validasi Terbaik**: ~70.6%
-- **AUC Validasi Terbaik**: ~0.7277
-- **Confusion Matrix & Classification Report** menunjukkan performa cukup seimbang antara prediksi suka dan tidak suka.
-- **ROC Curve** menghasilkan AUC 0.7277, yang menunjukkan kemampuan klasifikasi model cukup baik meski masih bisa ditingkatkan.
+- **Akurasi Validasi Terbaik**: ~72.8%
+- **AUC Validasi Terbaik**: ~0.7675
+- **Classification Report** menunjukkan akurasi sekitar 74%, yang mengindikasikan performa model cukup baik.
+- **Confusion Matrix** memperlihatkan keseimbangan yang baik antara prediksi kelas suka dan tidak suka.
+- **ROC Curve** menghasilkan AUC sebesar 0.7675, yang menunjukkan kemampuan klasifikasi model Collaborative Filtering cukup baik dan stabil.
+- Metrik evaluasi ini diambil dari epoch terakhir pelatihan model, yang menunjukkan model terus meningkat hingga akhir training.
+
 
 ### Penutup
 
