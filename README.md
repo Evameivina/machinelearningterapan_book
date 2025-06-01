@@ -163,9 +163,60 @@ Pada tahap ini, dilakukan beberapa teknik persiapan data (data preparation) untu
      user_all = np.sort(np.unique(ratings.user_id.unique()))
      ```
 
-### Alasan Tahapan Data Preparation:
+5. **Penanganan Missing Values**
+   - Mengisi nilai kosong pada kolom `language_code` dengan modus (nilai yang paling sering muncul):
+     ```python
+     mode_language = books['language_code'].mode()[0]
+     books['language_code'] = books['language_code'].fillna(mode_language)
+     ```
+   - Mengisi nilai kosong pada kolom `year` dengan median tahun:
+     ```python
+     median_year = books['year'].median()
+     books['year'] = books['year'].fillna(median_year)
+     ```
+
+6. **TF-IDF Vectorization (Content-Based Filtering)**
+   - Mengubah data teks (misalnya deskripsi buku) menjadi representasi numerik dengan TF-IDF untuk mengukur kemiripan konten antar buku.
+   - Teknik ini memungkinkan sistem rekomendasi berbasis konten menghasilkan rekomendasi yang relevan berdasarkan fitur teks.
+
+7. **Label Encoding (Collaborative Filtering)**
+   - Mengubah variabel kategorikal `user_id` dan `book_id` menjadi nilai numerik menggunakan Label Encoding agar sesuai dengan algoritma Collaborative Filtering:
+     ```python
+     from sklearn.preprocessing import LabelEncoder
+
+     user_encoder = LabelEncoder()
+     book_encoder = LabelEncoder()
+
+     ratings['user'] = user_encoder.fit_transform(ratings['user_id'])
+     ratings['book'] = book_encoder.fit_transform(ratings['book_id'])
+     ```
+
+8. **Pembuatan Label Biner dari Rating**
+   - Mengonversi rating asli ke label biner untuk keperluan klasifikasi:
+     - Rating ≥ 4 diberi label 1 (positif)
+     - Rating < 4 diberi label 0 (negatif)
+     ```python
+     ratings['rating_binary'] = ratings['rating'].apply(lambda x: 1 if x >= 4 else 0)
+     ```
+
+9. **Pembagian Data Menjadi Data Latih dan Validasi**
+   - Membagi data rating menjadi data latih dan validasi dengan rasio 80:20 menggunakan `train_test_split`:
+     ```python
+     from sklearn.model_selection import train_test_split
+
+     train, val = train_test_split(ratings, test_size=0.2, random_state=42)
+     ```
+
+### Alasan Tahapan Data Preparation
+
 - **Pemeriksaan struktur data** penting untuk mengetahui apakah terdapat data yang hilang, outlier, atau format tidak konsisten.
-- **Penggabungan data unik** diperlukan untuk membangun matriks interaksi pengguna-buku yang komprehensif, yang akan digunakan dalam sistem rekomendasi.
+- **Penggabungan data unik** diperlukan untuk membangun matriks interaksi pengguna-buku yang komprehensif.
+- **Penanganan missing values** mencegah error dan bias pada model akibat data kosong.
+- **TF-IDF vectorization** memungkinkan analisis kemiripan buku berdasarkan isi teks.
+- **Label encoding** diperlukan agar data kategorikal dapat diproses algoritma Collaborative Filtering.
+- **Pembuatan label biner** mempermudah klasifikasi preferensi pengguna.
+- **Pembagian data latih dan validasi** berguna untuk evaluasi performa model yang lebih objektif.
+
 
 ## Modeling
 
