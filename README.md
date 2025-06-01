@@ -269,16 +269,102 @@ Tahapan modeling pada proyek ini menggunakan pendekatan **Collaborative Filterin
 
 ## Evaluation
 
-### Metrik Evaluasi
+## Modeling
 
-Proyek ini menggunakan metrik berikut:
+Pada proyek ini, sistem rekomendasi buku dikembangkan menggunakan dua pendekatan utama, yaitu **Content-Based Filtering** dan **Collaborative Filtering berbasis Neural Network**. 
 
-| Metrik               | Deskripsi                                                                 |
-|----------------------|--------------------------------------------------------------------------|
-| **Accuracy**         | Proporsi prediksi yang benar dari semua prediksi                        |
-| **AUC (ROC Curve)**  | Kemampuan model membedakan antara kelas 1 dan 0                          |
-| **RMSE**             | Root Mean Squared Error untuk prediksi probabilitas                     |
-| **Precision, Recall, F1** | Dari `classification_report` untuk melihat keseimbangan model terhadap data imbang/tidak imbang |
+### 1. Content-Based Filtering
+
+Pendekatan ini menggunakan fitur konten buku (judul dan penulis) untuk merekomendasikan buku yang mirip secara teks.
+
+- **TF-IDF Vectorizer** digunakan untuk mengubah data teks (kombinasi judul dan penulis buku) menjadi representasi numerik.
+- **Cosine Similarity** digunakan untuk menghitung kemiripan antar buku berdasarkan vektor TF-IDF tersebut.
+
+#### Tahapan:
+
+1. Data judul dan penulis buku digabungkan menjadi satu kolom `combined`.
+2. TF-IDF Vectorizer dilatih pada data `combined` dengan mengabaikan stop words bahasa Inggris.
+3. Dihasilkan matriks TF-IDF untuk setiap buku.
+4. Matriks cosine similarity dihitung dari matriks TF-IDF tersebut, menghasilkan matriks kesamaan antar buku.
+5. Sistem merekomendasikan buku dengan skor similarity tertinggi untuk buku yang diberikan.
+
+#### Contoh output rekomendasi:
+
+Misal, rekomendasi Top-10 buku mirip untuk buku *"The Hunger Games (The Hunger Games, #1)"* adalah:
+
+| Title                                      | Author           | Year   | Avg Rating |
+|--------------------------------------------|------------------|--------|------------|
+| Catching Fire (The Hunger Games, #2)       | Suzanne Collins  | 2009   | 4.30       |
+| Mockingjay (The Hunger Games, #3)           | Suzanne Collins  | 2010   | 4.03       |
+| The Hunger Games Trilogy Boxset             | Suzanne Collins  | 2010   | 4.49       |
+| The Hunger Games: Official Illustrated Movie| Kate Egan        | 2012   | 4.51       |
+| The Hunger Games Tribute Guide               | Emily Seife      | 2012   | 4.40       |
+| Hunger (Gone, #2)                            | Michael Grant    | 2009   | 4.02       |
+| A Hunger Like No Other (Immortals After Dark)| Kresley Cole    | 2006   | 4.21       |
+| Nemesis Games (The Expanse, #5)              | James S.A. Corey | 2015   | 4.37       |
+| The Quillan Games (Pendragon, #7)            | D.J. MacHale     | 2005   | 4.19       |
+| The World of the Hunger Games (Hunger Games) | Kate Egan       | 2012   | 4.48       |
+
+### 2. Collaborative Filtering Berbasis Neural Network
+
+Pendekatan ini menggunakan interaksi pengguna dengan buku berupa rating untuk memprediksi preferensi dan merekomendasikan buku.
+
+#### Tahapan Modeling:
+
+1. **Encoding Identitas**
+   - ID pengguna dan buku dikonversi ke bentuk numerik menggunakan `LabelEncoder` untuk embedding.
+
+2. **Pembuatan Label**
+   - Rating dikonversi menjadi label biner:
+     - `1` jika rating ≥ 4 (menandakan suka)
+     - `0` jika rating < 4 (tidak suka)
+
+3. **Splitting Data**
+   - Data dibagi menjadi 80% latih dan 20% validasi menggunakan `train_test_split` dengan stratifikasi.
+
+4. **Arsitektur Model**
+   - Model `RecommenderNet` terdiri dari:
+     - Embedding Layer untuk pengguna dan buku
+     - Bias embedding untuk pengguna dan buku
+     - Dot Product antara embedding sebagai skor interaksi
+     - Dropout Layer untuk regularisasi
+     - Output layer dengan aktivasi sigmoid (prediksi probabilitas suka)
+
+5. **Parameter dan Hyperparameter**
+   - Embedding size: 64
+   - Loss function: Binary Crossentropy
+   - Optimizer: Adam (learning rate 5e-5)
+   - Metrics: Accuracy, AUC, RMSE
+   - Callbacks: EarlyStopping dan ReduceLROnPlateau
+
+6. **Training**
+   - Model dilatih maksimum 40 epoch dengan batch size 256.
+
+#### Kelebihan Model:
+
+- Menangkap hubungan laten antar pengguna dan buku.
+- Mudah di-tune dan ditingkatkan.
+- Tidak membutuhkan data fitur konten buku.
+
+#### Kekurangan Model:
+
+- Kurang efektif untuk pengguna atau buku baru (cold-start).
+- Membutuhkan banyak data interaksi untuk hasil optimal.
+
+### Output Top-N Rekomendasi Collaborative Filtering
+
+Setelah model terlatih, rekomendasi buku untuk pengguna tertentu diberikan berdasarkan skor prediksi tertinggi.
+
+Misal, untuk pengguna dengan ID tertentu, Top-5 rekomendasi buku yang diprediksi disukai adalah:
+
+| Book ID  | Title                            | Predicted Score |
+|----------|---------------------------------|-----------------|
+| 2251306  | Brain Rules: 12 Principles...    | 0.87            |
+| 5989573  | Scott Pilgrim, Volume 5          | 0.85            |
+| 40024    | The Alienist                    | 0.83            |
+| 234184   | Stone of Tears                  | 0.82            |
+| 4800764  | Sweet Persuasion                | 0.80            |
+
 
 ### Hasil Evaluasi
 
