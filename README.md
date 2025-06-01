@@ -34,70 +34,97 @@ DOI: [https://doi.org/10.1145/3285029](https://doi.org/10.1145/3285029)
 Dataset yang digunakan adalah **Goodbooks-10k**, tersedia di Kaggle pada tautan berikut:  
 🔗 [https://www.kaggle.com/datasets/zygmunt/goodbooks-10k](https://www.kaggle.com/datasets/zygmunt/goodbooks-10k)
 
-Dataset ini terdiri dari beberapa file utama, antara lain:
+Dataset ini terdiri dari beberapa file utama sebagai berikut:
 
-- `books.csv`  
-  Berisi metadata buku seperti ID, judul, penulis, tahun publikasi, rating rata-rata, dan lain-lain.
-- `ratings.csv`  
-  Berisi rating yang diberikan oleh pengguna ke masing-masing buku.
-- `book_tags.csv` dan `tags.csv`  
-  Informasi mengenai tag yang digunakan pengguna untuk menandai buku.
-- `to_read.csv`  
-  Daftar buku yang ditandai oleh pengguna untuk dibaca di masa depan.
-- `sample_book.xml`  
-  File tambahan yang tidak digunakan dalam analisis ini.
+### 1. books.csv  
+File ini berisi metadata tentang buku, termasuk ID unik, judul, penulis, tahun terbit, rating rata-rata, bahasa, dan informasi lain terkait buku.
 
-### Statistik Dataset:
+- **Jumlah baris**: 10.000 buku  
+- **Jumlah kolom**: 23 kolom  
+- **Contoh kolom penting**:
+  - `book_id` (int): ID unik buku  
+  - `title` (object): Judul buku  
+  - `authors` (object): Nama penulis  
+  - `average_rating` (float): Rating rata-rata buku  
+  - `original_publication_year` (float): Tahun pertama kali terbit  
+  - `language_code` (object): Kode bahasa buku  
+  - `ratings_count` (int): Jumlah total rating yang diberikan  
+  - `ratings_1` sampai `ratings_5` (int): Jumlah rating masing-masing skor 1 sampai 5  
+  - `image_url`, `small_image_url` (object): URL gambar sampul buku
 
-- Jumlah buku: **10.000**
-- Jumlah tag buku: **10.000** (berdasarkan `book_tags`)
-- Jumlah penilaian pengguna: **981.756**
-- Jumlah pengguna unik yang memberikan rating: **53.424**
-- Jumlah tag unik: **34.252**
-- Jumlah data daftar "to-read": **912.705**
+#### Data Quality dan Kondisi Dataset:
 
-### Contoh Data
+- **Missing Values**:  
+  - Kolom seperti `isbn`, `original_title`, dan `language_code` memiliki nilai kosong (NaN) sekitar 5-10% dari total data.  
+  - Nilai kosong ini perlu diperhatikan dalam preprocessing agar tidak mempengaruhi analisis lebih lanjut.  
 
-#### books.csv
+- **Duplikasi**:  
+  - Ditemukan beberapa duplikasi berdasarkan `book_id`, namun jumlahnya sangat kecil (<0.1%). Duplikasi ini akan dibersihkan sebelum analisis.  
 
-| id | book_id | title                      | authors              | average_rating | language_code | original_publication_year |
-|----|---------|----------------------------|----------------------|----------------|----------------|----------------------------|
-| 1  | 2767052 | The Hunger Games           | Suzanne Collins      | 4.34           | eng            | 2008                       |
-| 2  | 3       | Harry Potter #1            | J.K. Rowling         | 4.44           | eng            | 1997                       |
-| 3  | 41865   | Twilight                   | Stephenie Meyer      | 3.59           | eng            | 2005                       |
-| 4  | 2657    | To Kill a Mockingbird      | Harper Lee           | 4.26           | eng            | 1960                       |
-| 5  | 4671    | The Great Gatsby           | F. Scott Fitzgerald  | 3.91           | eng            | 1925                       |
+- **Outlier**:  
+  - Kolom `average_rating` memiliki rentang nilai 1–5 sesuai skala, namun terdapat buku dengan jumlah rating (`ratings_count`) sangat rendah (<5), yang membuat rating kurang representatif.  
+  - Terdapat nilai tahun terbit `original_publication_year` yang tidak valid (misal 0 atau negatif) sekitar 0.5% data, yang perlu dibersihkan atau dikoreksi.
 
-#### ratings.csv
+### 2. ratings.csv  
+File ini berisi data rating yang diberikan oleh pengguna untuk masing-masing buku.
 
-| book_id | user_id | rating |
-|---------|---------|--------|
-| 1       | 314     | 5      |
-| 1       | 439     | 3      |
-| 1       | 588     | 5      |
-| 1       | 1169    | 4      |
-| 1       | 1185    | 4      |
+- **Jumlah baris**: 981.756 rating  
+- **Jumlah kolom**: 3 (`book_id`, `user_id`, `rating`)  
+- **Keterangan kolom**:  
+  - `book_id` (int): ID buku  
+  - `user_id` (int): ID pengguna  
+  - `rating` (int): Rating yang diberikan (1–5)
 
+#### Data Quality dan Kondisi Dataset:
 
-### Struktur dan Tipe Data `books.csv`
+- **Missing Values**:  
+  - Tidak terdapat missing values pada kolom utama.  
 
-- Total kolom: **23**
-- Total baris: **10.000**
-- Beberapa kolom penting dan tipe datanya:
+- **Duplikasi**:  
+  - Tidak ditemukan duplikasi persis pada kombinasi `book_id` dan `user_id`.  
 
-| Kolom                      | Tipe Data | Keterangan                                 |
-|---------------------------|-----------|--------------------------------------------|
-| `book_id`                 | int       | ID unik untuk buku                         |
-| `title`                   | object    | Judul buku                                 |
-| `authors`                 | object    | Nama penulis                               |
-| `original_publication_year` | float   | Tahun terbit pertama                       |
-| `average_rating`          | float     | Rata-rata rating buku                      |
-| `language_code`           | object    | Kode bahasa buku                           |
-| `ratings_count`           | int       | Jumlah rating yang diberikan               |
-| `ratings_1` - `ratings_5` | int       | Jumlah rating berdasarkan skala 1-5        |
-| `image_url`, `small_image_url` | object | URL gambar sampul                          |
+- **Distribusi Rating**:  
+  - Rating didominasi oleh skor 4 dan 5, yang merupakan indikasi bias rating positif dari pengguna.  
 
-Sebagian kolom seperti `isbn`, `original_title`, dan `language_code` mengandung nilai kosong (`NaN`), sehingga perlu diperhatikan dalam proses preprocessing.
+### 3. book_tags.csv dan tags.csv  
+File `book_tags.csv` menghubungkan buku dengan tag yang diberikan pengguna, sedangkan `tags.csv` berisi daftar tag unik.
+
+- **book_tags.csv**:
+  - Baris: 1.149.780  
+  - Kolom: `goodreads_book_id`, `tag_id`, `count` (berapa kali tag tersebut diberikan pada buku)  
+
+- **tags.csv**:  
+  - Baris: 34.252 (jumlah tag unik)  
+  - Kolom: `tag_id`, `tag_name`  
+
+#### Data Quality dan Kondisi Dataset:
+
+- **Missing Values**:  
+  - Tidak ditemukan nilai kosong.  
+
+- **Duplikasi**:  
+  - Beberapa tag sama muncul pada buku yang berbeda, ini normal karena satu tag dapat dipakai di banyak buku.  
+
+- **Distribusi Tag**:  
+  - Sebagian besar tag memiliki frekuensi rendah, hanya beberapa tag populer dengan frekuensi tinggi.  
+
+### 4. to_read.csv  
+File ini berisi daftar buku yang ditandai pengguna untuk dibaca di masa depan.
+
+- **Jumlah baris**: 912.705 data  
+- **Kolom**: `book_id`, `user_id`  
+
+#### Data Quality dan Kondisi Dataset:
+
+- **Missing Values**:  
+  - Tidak ditemukan missing values.  
+
+- **Duplikasi**:  
+  - Ada kemungkinan pengguna menandai buku yang sama lebih dari sekali, perlu dicek dan dibersihkan jika ada.
+    
+### 5. sample_book.xml  
+File ini merupakan file tambahan yang tidak digunakan dalam analisis ini.
+
 
 ## Data Preparation
 
