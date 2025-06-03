@@ -228,15 +228,14 @@ Pada tahap ini, dilakukan beberapa teknik persiapan data (data preparation) untu
 
 ### 1. Content-Based Filtering
 
-Pendekatan ini merekomendasikan buku berdasarkan kemiripan konten.
+Pendekatan ini merekomendasikan buku berdasarkan kemiripan konten yang diwakili oleh fitur TF-IDF.
 
-- Gunakan **TF-IDF** pada data gabungan `title + author`.
-- Hitung **cosine similarity** antar buku.
-- Rekomendasi diberikan untuk buku-buku dengan skor similarity tertinggi terhadap buku yang dipilih.
+- Menggunakan **cosine similarity** untuk mengukur tingkat kemiripan antar buku berdasarkan representasi TF-IDF.
+- Rekomendasi diberikan dengan memilih buku-buku yang memiliki skor similarity tertinggi terhadap buku yang dipilih.
 
 #### Contoh Output Top-10 Rekomendasi
 
-Untuk buku: _"The Hunger Games (The Hunger Games, #1)"_, berikut rekomendasi buku yang paling mirip:
+Untuk buku: *"The Hunger Games (The Hunger Games, #1)"*, berikut adalah 10 rekomendasi buku paling mirip berdasarkan cosine similarity:
 
 | Title                                      | Author           | Avg Rating |
 |--------------------------------------------|------------------|------------|
@@ -250,7 +249,6 @@ Untuk buku: _"The Hunger Games (The Hunger Games, #1)"_, berikut rekomendasi buk
 | Nemesis Games (The Expanse, #5)            | James S.A. Corey | 4.37       |
 | The Quillan Games                           | D.J. MacHale     | 4.19       |
 | The World of the Hunger Games              | Kate Egan        | 4.48       |
-
 
 ### 2. Collaborative Filtering (Neural Network)
 
@@ -287,18 +285,20 @@ Pendekatan ini memanfaatkan data interaksi (rating) untuk memprediksi preferensi
 - Tidak efektif untuk user/buku baru (cold-start)
 - Butuh banyak data interaksi untuk hasil optimal
 
+
 ## Output Top-N Rekomendasi
 
-Berikut adalah contoh hasil rekomendasi untuk **user dengan ID = 1** berdasarkan prediksi skor tertinggi dari model:
+Berikut adalah contoh hasil rekomendasi untuk **user dengan ID = 1** :
 
-| Book ID | Judul Buku                                  | Predicted Score |
-|---------|---------------------------------------------|-----------------|
-| 760092  | Don't Waste Your Life                       | 0.9308          |
-| 161938  | Bibles: NIV Compact Navy                    | 0.9297          |
-| 223236  | My Utmost for His Highest                   | 0.9286          |
-| 460383  | Light in Shadow (Whispering Springs, #1)    | 0.9283          |
-| 311659  | Light in the Darkness: Black Holes, the Un... | 0.9266        |
+recommended_book_real_ids: [347656, 22698568, 801178, 6907672, 16298]
 
+Rekomendasi Top-5 untuk User 1:
+
+1. Don't Waste Your Life - John Piper  
+2. The Invasion of the Tearling (The Queen of the Tearling, #2) - Erika Johansen  
+3. Chicken Soup for the Soul - Jack Canfield, Mark Victor Hansen  
+4. The Talisman (Volume 1): The Road of Trials - Robin Furth, Stephen King, Peter Straub, Tony Shasteen, Nei Ruffino  
+5. A Murder Is Announced (Miss Marple, #5) - Agatha Christie  
 
 
 ## Evaluation
