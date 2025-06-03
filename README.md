@@ -31,101 +31,108 @@ Menurut riset oleh Zhang et al. (2019), sistem rekomendasi terbukti mampu mening
 Zhang, S., Yao, L., Sun, A., & Tay, Y. (2019). *Deep Learning based Recommender System: A Survey and New Perspectives.* ACM Computing Surveys (CSUR), 52(1), 1-38.  
 DOI: [https://doi.org/10.1145/3285029](https://doi.org/10.1145/3285029)
 
-## Data Understanding
+# Data Understanding - Goodbooks-10k Dataset
 
-Dataset yang digunakan adalah **Goodbooks-10k**, tersedia di Kaggle pada tautan berikut:  
-🔗 [https://www.kaggle.com/datasets/zygmunt/goodbooks-10k](https://www.kaggle.com/datasets/zygmunt/goodbooks-10k)
+Dataset ini berasal dari **Goodbooks-10k** yang tersedia di Kaggle:  
+[https://www.kaggle.com/datasets/zygmunt/goodbooks-10k](https://www.kaggle.com/datasets/zygmunt/goodbooks-10k)
 
-Dataset ini terdiri dari beberapa file utama sebagai berikut:
+Dataset terdiri dari beberapa file utama yang berisi data buku, rating, tag, dan daftar bacaan pengguna.
 
-### 1. books.csv  
-File ini berisi metadata tentang buku, termasuk ID unik, judul, penulis, tahun terbit, rating rata-rata, bahasa, dan informasi lain terkait buku.
+## 1. books.csv
 
-- **Jumlah baris**: 10.000 buku  
-- **Jumlah kolom**: 23 kolom  
-- **Contoh kolom penting**:
-  - `book_id` (int): ID unik buku  
-  - `title` (object): Judul buku  
-  - `authors` (object): Nama penulis  
-  - `average_rating` (float): Rating rata-rata buku  
-  - `original_publication_year` (float): Tahun pertama kali terbit  
-  - `language_code` (object): Kode bahasa buku  
-  - `ratings_count` (int): Jumlah total rating yang diberikan  
-  - `ratings_1` sampai `ratings_5` (int): Jumlah rating masing-masing skor 1 sampai 5  
-  - `image_url`, `small_image_url` (object): URL gambar sampul buku
+- **Jumlah data:** 10.000 baris  
+- **Jumlah kolom:** 23 kolom  
 
-#### Data Quality dan Kondisi Dataset:
+### Deskripsi Kolom Penting
 
-- **Missing Values**:  
-  - Kolom seperti `isbn`, `original_title`, dan `language_code` memiliki nilai kosong (NaN) sekitar 5-10% dari total data.  
-  - Nilai kosong ini perlu diperhatikan dalam preprocessing agar tidak mempengaruhi analisis lebih lanjut.  
+| Kolom                      | Tipe Data | Deskripsi                                            |
+|----------------------------|-----------|------------------------------------------------------|
+| `id`                       | int       | Nomor urut buku dalam dataset                         |
+| `book_id`                  | int       | ID unik buku                                         |
+| `best_book_id`             | int       | ID terbaik yang mengacu pada edisi buku tertentu     |
+| `work_id`                  | int       | ID karya utama (bisa lebih dari satu edisi)          |
+| `books_count`              | int       | Jumlah buku/edisi karya tersebut                      |
+| `isbn`                     | object    | Kode ISBN 10                                        |
+| `isbn13`                   | float64   | Kode ISBN 13                                       |
+| `authors`                  | object    | Nama penulis                                        |
+| `original_publication_year`| float64   | Tahun terbit pertama kali buku                       |
+| `original_title`           | object    | Judul asli buku (jika berbeda dengan `title`)       |
+| `title`                    | object    | Judul buku                                          |
+| `language_code`            | object    | Kode bahasa buku                                    |
+| `average_rating`           | float64   | Rating rata-rata (skala 1-5)                        |
+| `ratings_count`            | int       | Jumlah rating yang diterima buku                     |
+| `work_ratings_count`       | int       | Jumlah rating untuk keseluruhan karya                |
+| `work_text_reviews_count`  | int       | Jumlah ulasan teks karya                             |
+| `ratings_1` - `ratings_5` | int       | Jumlah rating tiap skor 1 sampai 5                   |
+| `image_url`                | object    | URL gambar sampul ukuran besar                       |
+| `small_image_url`          | object    | URL gambar sampul ukuran kecil                       |
 
-- **Duplikasi**:  
-  - Ditemukan beberapa duplikasi berdasarkan `book_id`, namun jumlahnya sangat kecil (<0.1%). Duplikasi ini akan dibersihkan sebelum analisis.  
+### Kualitas Data
 
-- **Outlier**:  
-  - Kolom `average_rating` memiliki rentang nilai 1–5 sesuai skala, namun terdapat buku dengan jumlah rating (`ratings_count`) sangat rendah (<5), yang membuat rating kurang representatif.  
-  - Terdapat nilai tahun terbit `original_publication_year` yang tidak valid (misal 0 atau negatif) sekitar 0.5% data, yang perlu dibersihkan atau dikoreksi.
+- Terdapat missing value di beberapa kolom seperti `isbn`, `isbn13`, `original_title`, dan `language_code` (~5-10%).  
+- Beberapa duplikasi `book_id` ditemukan, jumlahnya sangat sedikit (<0.1%).  
+- Outlier: beberapa buku dengan `ratings_count` sangat rendah (<5), dan ada nilai tahun terbit tidak valid.
 
-### 2. ratings.csv  
-File ini berisi data rating yang diberikan oleh pengguna untuk masing-masing buku.
+## 2. ratings.csv
 
-- **Jumlah baris**: 981.756 rating  
-- **Jumlah kolom**: 3 (`book_id`, `user_id`, `rating`)  
-- **Keterangan kolom**:  
-  - `book_id` (int): ID buku  
-  - `user_id` (int): ID pengguna  
-  - `rating` (int): Rating yang diberikan (1–5)
+- **Jumlah data:** 981.756 baris  
+- **Jumlah kolom:** 3  
 
-#### Data Quality dan Kondisi Dataset:
+### Kolom
 
-- **Missing Values**:  
-  - Tidak terdapat missing values pada kolom utama.  
+| Kolom   | Tipe Data | Deskripsi               |
+|---------|-----------|-------------------------|
+| `book_id` | int     | ID buku                 |
+| `user_id` | int     | ID pengguna             |
+| `rating`  | int     | Nilai rating 1 sampai 5 |
 
-- **Duplikasi**:  
-  - Tidak ditemukan duplikasi persis pada kombinasi `book_id` dan `user_id`.  
+### Kualitas Data
 
-- **Distribusi Rating**:  
-  - Rating didominasi oleh skor 4 dan 5, yang merupakan indikasi bias rating positif dari pengguna.  
+- Tidak ada nilai kosong.  
+- Tidak ditemukan duplikasi kombinasi `book_id` dan `user_id`.  
+- Rating didominasi oleh nilai 4 dan 5.
 
-### 3. book_tags.csv dan tags.csv  
-File `book_tags.csv` menghubungkan buku dengan tag yang diberikan pengguna, sedangkan `tags.csv` berisi daftar tag unik.
+## 3. book_tags.csv & tags.csv
 
-- **book_tags.csv**:
-  - Baris: 1.149.780  
-  - Kolom: `goodreads_book_id`, `tag_id`, `count` (berapa kali tag tersebut diberikan pada buku)  
+- **book_tags.csv**  
+  - Baris: 999.912  
+  - Kolom: `goodreads_book_id`, `tag_id`, `count`  
 
-- **tags.csv**:  
-  - Baris: 34.252 (jumlah tag unik)  
+- **tags.csv**  
+  - Baris: 34.252  
   - Kolom: `tag_id`, `tag_name`  
 
-#### Data Quality dan Kondisi Dataset:
+### Kualitas Data
 
-- **Missing Values**:  
-  - Tidak ditemukan nilai kosong.  
+- Tidak ada missing value.  
+- Tag yang sama bisa muncul di buku berbeda (normal).  
+- Distribusi tag sebagian besar rendah, hanya beberapa tag populer yang sering muncul.
 
-- **Duplikasi**:  
-  - Beberapa tag sama muncul pada buku yang berbeda, ini normal karena satu tag dapat dipakai di banyak buku.  
 
-- **Distribusi Tag**:  
-  - Sebagian besar tag memiliki frekuensi rendah, hanya beberapa tag populer dengan frekuensi tinggi.  
+## 4. to_read.csv
 
-### 4. to_read.csv  
-File ini berisi daftar buku yang ditandai pengguna untuk dibaca di masa depan.
+- **Jumlah data:** 912.705 baris  
+- **Kolom:** `book_id`, `user_id`  
 
-- **Jumlah baris**: 912.705 data  
-- **Kolom**: `book_id`, `user_id`  
+### Kualitas Data
 
-#### Data Quality dan Kondisi Dataset:
+- Tidak ditemukan missing value.  
+- Ada kemungkinan duplikasi penandaan buku oleh pengguna, perlu pengecekan lebih lanjut.
 
-- **Missing Values**:  
-  - Tidak ditemukan missing values.  
+## 5. sample_book.xml
 
-- **Duplikasi**:  
-  - Ada kemungkinan pengguna menandai buku yang sama lebih dari sekali, perlu dicek dan dibersihkan jika ada.
-    
-### 5. sample_book.xml  
-File ini merupakan file tambahan yang tidak digunakan dalam analisis ini.
+- File tambahan, tidak digunakan dalam analisis saat ini.
+
+# Ringkasan Dataset
+
+| Dataset       | Jumlah Baris | Jumlah Kolom | Catatan                             |
+|---------------|--------------|--------------|-----------------------------------|
+| books.csv     | 10.000       | 23           | Metadata buku dengan beberapa nilai kosong |
+| ratings.csv   | 981.756      | 3            | Data rating pengguna               |
+| book_tags.csv | 999.912      | 3            | Relasi buku dan tag                |
+| tags.csv      | 34.252       | 2            | Daftar tag unik                   |
+| to_read.csv   | 912.705      | 2            | Daftar buku yang ingin dibaca     |
+
 
 ## Data Preparation
 
