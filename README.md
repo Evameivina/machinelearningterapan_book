@@ -153,38 +153,36 @@ Pada tahap ini, dilakukan beberapa teknik persiapan data (data preparation) untu
      print('Jumlah book_id (buku): ', len(ratings.book_id.unique()))
      ```
 
-3. **Gabungan Data Buku**
-   - Menggabungkan seluruh `book_id` dari beberapa sumber dataset (`books`, `ratings`, `book_tags`, `to_read`) untuk mendapatkan daftar buku unik:
-     ```python
-     books_all = np.concatenate((
-         books.book_id.unique(),
-         ratings.book_id.unique(),
-         book_tags.goodreads_book_id.unique(),
-         to_read.book_id.unique()
-     ))
-     books_all = np.sort(np.unique(books_all))
-     ```
+3. **Penggabungan Dataframe (Merge)**
+   - Beberapa dataframe digabung menggunakan fungsi `pd.merge` untuk menggabungkan informasi dari beberapa sumber data:
+     - Contoh penggabungan dataframe `books_ratings` yang menggabungkan data `ratings` dengan `book_new` berdasarkan `book_id`:
+       ```python
+       books_ratings = pd.merge(ratings, book_new, left_on='book_id', right_on='id', how='left')
+       ```
+     - Kemudian `books_ratings_with_tagcount` digabungkan dengan dataframe `tags_count` berdasarkan `book_id` untuk menambahkan informasi tag:
+       ```python
+       books_ratings_with_tagcount = pd.merge(books_ratings, tags_count, on='book_id', how='left')
+       ```
+     - Penggabungan lanjutan membentuk dataframe `books_ratings_full` untuk melengkapi data dengan semua fitur yang dibutuhkan.
 
-4. **Gabungan Data Pengguna**
-   - Menggabungkan seluruh `user_id` unik dari dataset `ratings`:
+4. **Pembuatan Fitur Baru - Combined**
+   - Fitur `combined` dibuat sebagai gabungan dari kolom `title` dan `author` untuk digunakan sebagai input pada TF-IDF:
      ```python
-     user_all = np.sort(np.unique(ratings.user_id.unique()))
+     book_new['combined'] = book_new['title'] + ' ' + book_new['author']
      ```
+   - Fitur ini penting untuk memproses teks buku secara lebih komprehensif dalam content-based filtering.
 
 5. **Penanganan Missing Values**
-   - Mengisi nilai kosong pada kolom `language_code` dengan modus (nilai yang paling sering muncul):
-     ```python
-     mode_language = books['language_code'].mode()[0]
-     books['language_code'] = books['language_code'].fillna(mode_language)
-     ```
-   - Mengisi nilai kosong pada kolom `year` dengan median tahun:
-     ```python
-     median_year = books['year'].median()
-     books['year'] = books['year'].fillna(median_year)
-     ```
+   - Penanganan missing value dilakukan pada dataframe `book_new`:
+     - Kolom `year` yang memiliki nilai kosong diisi dengan median tahun:
+       ```python
+       median_year = book_new['year'].median()
+       book_new['year'] = book_new['year'].fillna(median_year)
+       ```
+     - Pengisian missing values ini memastikan data konsisten dan siap untuk proses modeling.
 
 6. **TF-IDF Vectorization (Content-Based Filtering)**
-   - Mengubah data teks (misalnya deskripsi buku) menjadi representasi numerik dengan TF-IDF untuk mengukur kemiripan konten antar buku.
+   - Mengubah data teks (misalnya fitur `combined`) menjadi representasi numerik dengan TF-IDF untuk mengukur kemiripan konten antar buku.
    - Teknik ini memungkinkan sistem rekomendasi berbasis konten menghasilkan rekomendasi yang relevan berdasarkan fitur teks.
 
 7. **Label Encoding (Collaborative Filtering)**
@@ -218,12 +216,14 @@ Pada tahap ini, dilakukan beberapa teknik persiapan data (data preparation) untu
 ### Alasan Tahapan Data Preparation
 
 - **Pemeriksaan struktur data** penting untuk mengetahui apakah terdapat data yang hilang, outlier, atau format tidak konsisten.
-- **Penggabungan data unik** diperlukan untuk membangun matriks interaksi pengguna-buku yang komprehensif.
+- **Penggabungan data (merge)** diperlukan untuk menggabungkan informasi penting dari beberapa dataframe agar fitur lengkap tersedia untuk model.
+- **Pembuatan fitur baru (combined)** membantu mengolah data teks secara efektif untuk content-based filtering.
 - **Penanganan missing values** mencegah error dan bias pada model akibat data kosong.
 - **TF-IDF vectorization** memungkinkan analisis kemiripan buku berdasarkan isi teks.
 - **Label encoding** diperlukan agar data kategorikal dapat diproses algoritma Collaborative Filtering.
 - **Pembuatan label biner** mempermudah klasifikasi preferensi pengguna.
 - **Pembagian data latih dan validasi** berguna untuk evaluasi performa model yang lebih objektif.
+
 
 
 ## Modeling
