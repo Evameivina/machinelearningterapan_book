@@ -31,7 +31,7 @@ Menurut riset oleh Zhang et al. (2019), sistem rekomendasi terbukti mampu mening
 Zhang, S., Yao, L., Sun, A., & Tay, Y. (2019). *Deep Learning based Recommender System: A Survey and New Perspectives.* ACM Computing Surveys (CSUR), 52(1), 1-38.  
 DOI: [https://doi.org/10.1145/3285029](https://doi.org/10.1145/3285029)
 
-# Data Understanding - Goodbooks-10k Dataset
+## Data Understanding 
 
 Dataset ini berasal dari **Goodbooks-10k** yang tersedia di Kaggle:  
 [https://www.kaggle.com/datasets/zygmunt/goodbooks-10k](https://www.kaggle.com/datasets/zygmunt/goodbooks-10k)
