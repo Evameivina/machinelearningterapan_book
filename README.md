@@ -224,152 +224,80 @@ Pada tahap ini, dilakukan beberapa teknik persiapan data (data preparation) untu
 - **Pembuatan label biner** mempermudah klasifikasi preferensi pengguna.
 - **Pembagian data latih dan validasi** berguna untuk evaluasi performa model yang lebih objektif.
 
-
-
 ## Modeling
-
-Tahapan modeling pada proyek ini menggunakan pendekatan **Collaborative Filtering berbasis Neural Network** untuk membangun sistem rekomendasi buku. Algoritma yang digunakan adalah arsitektur custom berbasis **Embedding Layers dan Dot Product** menggunakan **TensorFlow Keras**.
-
-### Tahapan Modeling
-
-1. **Encoding Identitas**
-   - Data ID pengguna dan buku diubah ke bentuk numerik menggunakan `LabelEncoder`, agar dapat digunakan dalam embedding.
-
-2. **Pembuatan Label**
-   - Rating dikonversi menjadi label biner:
-     - `1` jika rating ≥ 4 (suka)
-     - `0` jika rating < 4 (tidak suka)
-
-3. **Splitting Data**
-   - Data dibagi menjadi 80% data latih dan 20% data validasi menggunakan `train_test_split` dengan stratifikasi.
-
-4. **Arsitektur Model**
-   - Model `RecommenderNet` terdiri dari:
-     - **Embedding Layer** untuk user dan book
-     - **Bias Embedding** untuk user dan book
-     - **Dot Product** sebagai skor interaksi
-     - **Dropout Layer** untuk regularisasi
-     - **Output Layer**: aktivasi sigmoid
-
-5. **Parameter dan Hyperparameter**
-   - Embedding size: 64
-   - Loss function: Binary Crossentropy
-   - Optimizer: Adam (`learning_rate = 5e-5`)
-   - Metrics: Accuracy, AUC, RMSE
-   - Callbacks:
-     - `EarlyStopping` (monitor: val_auc, patience: 5)
-     - `ReduceLROnPlateau` (monitor: val_auc, factor: 0.5, patience: 3)
-
-6. **Training**
-   - Model dilatih selama maksimum 40 epoch dengan batch size 256.
-
-### Kelebihan Model
-
-- Mampu menangkap hubungan laten antar user dan buku.
-- Flexible untuk dilakukan improvement (misalnya tuning embedding size, dropout, dsb).
-- Tidak membutuhkan fitur konten buku secara eksplisit.
-
-### Kekurangan Model
-
-- Tidak bekerja optimal pada user/buku baru (cold-start problem).
-- Membutuhkan cukup banyak data interaksi untuk hasil optimal.
-
-
-## Modeling
-
-Pada proyek ini, sistem rekomendasi buku dikembangkan menggunakan dua pendekatan utama, yaitu **Content-Based Filtering** dan **Collaborative Filtering berbasis Neural Network**. 
 
 ### 1. Content-Based Filtering
 
-Pendekatan ini menggunakan fitur konten buku (judul dan penulis) untuk merekomendasikan buku yang mirip secara teks.
+Pendekatan ini merekomendasikan buku berdasarkan kemiripan konten.
 
-- **TF-IDF Vectorizer** digunakan untuk mengubah data teks (kombinasi judul dan penulis buku) menjadi representasi numerik.
-- **Cosine Similarity** digunakan untuk menghitung kemiripan antar buku berdasarkan vektor TF-IDF tersebut.
+- Gunakan **TF-IDF** pada data gabungan `title + author`.
+- Hitung **cosine similarity** antar buku.
+- Rekomendasi diberikan untuk buku-buku dengan skor similarity tertinggi terhadap buku yang dipilih.
 
-#### Tahapan:
+#### Contoh Output Top-10 Rekomendasi
 
-1. Data judul dan penulis buku digabungkan menjadi satu kolom `combined`.
-2. TF-IDF Vectorizer dilatih pada data `combined` dengan mengabaikan stop words bahasa Inggris.
-3. Dihasilkan matriks TF-IDF untuk setiap buku.
-4. Matriks cosine similarity dihitung dari matriks TF-IDF tersebut, menghasilkan matriks kesamaan antar buku.
-5. Sistem merekomendasikan buku dengan skor similarity tertinggi untuk buku yang diberikan.
+Untuk buku: _"The Hunger Games (The Hunger Games, #1)"_, berikut rekomendasi buku yang paling mirip:
 
-#### Contoh output rekomendasi:
+| Title                                      | Author           | Avg Rating |
+|--------------------------------------------|------------------|------------|
+| Catching Fire (The Hunger Games, #2)       | Suzanne Collins  | 4.30       |
+| Mockingjay (The Hunger Games, #3)          | Suzanne Collins  | 4.03       |
+| The Hunger Games Trilogy Boxset            | Suzanne Collins  | 4.49       |
+| The Hunger Games: Official Illustrated Movie Companion | Kate Egan | 4.51       |
+| The Hunger Games Tribute Guide             | Emily Seife      | 4.40       |
+| Hunger (Gone, #2)                          | Michael Grant    | 4.02       |
+| A Hunger Like No Other                     | Kresley Cole     | 4.21       |
+| Nemesis Games (The Expanse, #5)            | James S.A. Corey | 4.37       |
+| The Quillan Games                           | D.J. MacHale     | 4.19       |
+| The World of the Hunger Games              | Kate Egan        | 4.48       |
 
-Misal, rekomendasi Top-10 buku mirip untuk buku *"The Hunger Games (The Hunger Games, #1)"* adalah:
 
-| Title                                      | Author           | Year   | Avg Rating |
-|--------------------------------------------|------------------|--------|------------|
-| Catching Fire (The Hunger Games, #2)       | Suzanne Collins  | 2009   | 4.30       |
-| Mockingjay (The Hunger Games, #3)           | Suzanne Collins  | 2010   | 4.03       |
-| The Hunger Games Trilogy Boxset             | Suzanne Collins  | 2010   | 4.49       |
-| The Hunger Games: Official Illustrated Movie| Kate Egan        | 2012   | 4.51       |
-| The Hunger Games Tribute Guide               | Emily Seife      | 2012   | 4.40       |
-| Hunger (Gone, #2)                            | Michael Grant    | 2009   | 4.02       |
-| A Hunger Like No Other (Immortals After Dark)| Kresley Cole    | 2006   | 4.21       |
-| Nemesis Games (The Expanse, #5)              | James S.A. Corey | 2015   | 4.37       |
-| The Quillan Games (Pendragon, #7)            | D.J. MacHale     | 2005   | 4.19       |
-| The World of the Hunger Games (Hunger Games) | Kate Egan       | 2012   | 4.48       |
+### 2. Collaborative Filtering (Neural Network)
 
-### 2. Collaborative Filtering Berbasis Neural Network
+Pendekatan ini memanfaatkan data interaksi (rating) untuk memprediksi preferensi pengguna dan memberikan rekomendasi.
 
-Pendekatan ini menggunakan interaksi pengguna dengan buku berupa rating untuk memprediksi preferensi dan merekomendasikan buku.
+#### Arsitektur Model:
 
-#### Tahapan Modeling:
+- Dua buah **Embedding Layer**: untuk user dan buku
+- Dua buah **Bias Embedding**
+- **Dot Product** dari embedding sebagai skor prediksi
+- **Dropout Layer** untuk regularisasi
+- Output layer: sigmoid (menghasilkan nilai probabilitas antara 0 dan 1)
 
-1. **Encoding Identitas**
-   - ID pengguna dan buku dikonversi ke bentuk numerik menggunakan `LabelEncoder` untuk embedding.
+#### Hyperparameter:
 
-2. **Pembuatan Label**
-   - Rating dikonversi menjadi label biner:
-     - `1` jika rating ≥ 4 (menandakan suka)
-     - `0` jika rating < 4 (tidak suka)
+- Embedding size: `64`
+- Loss Function: `Binary Crossentropy`
+- Optimizer: `Adam` (learning rate = 5e-5)
+- Metrics: Accuracy, AUC, RMSE
+- Callbacks: `EarlyStopping`, `ReduceLROnPlateau`
 
-3. **Splitting Data**
-   - Data dibagi menjadi 80% latih dan 20% validasi menggunakan `train_test_split` dengan stratifikasi.
+#### Proses Pelatihan:
 
-4. **Arsitektur Model**
-   - Model `RecommenderNet` terdiri dari:
-     - Embedding Layer untuk pengguna dan buku
-     - Bias embedding untuk pengguna dan buku
-     - Dot Product antara embedding sebagai skor interaksi
-     - Dropout Layer untuk regularisasi
-     - Output layer dengan aktivasi sigmoid (prediksi probabilitas suka)
+- Data dibagi menjadi 80% latih dan 20% validasi (stratifikasi label)
+- Model dilatih hingga maksimal 40 epoch, batch size 256
 
-5. **Parameter dan Hyperparameter**
-   - Embedding size: 64
-   - Loss function: Binary Crossentropy
-   - Optimizer: Adam (learning rate 5e-5)
-   - Metrics: Accuracy, AUC, RMSE
-   - Callbacks: EarlyStopping dan ReduceLROnPlateau
+#### Kelebihan:
 
-6. **Training**
-   - Model dilatih maksimum 40 epoch dengan batch size 256.
+- Menangkap hubungan laten antar pengguna dan buku
+- Tidak memerlukan fitur konten buku
 
-#### Kelebihan Model:
+#### Kekurangan:
 
-- Menangkap hubungan laten antar pengguna dan buku.
-- Mudah di-tune dan ditingkatkan.
-- Tidak membutuhkan data fitur konten buku.
+- Tidak efektif untuk user/buku baru (cold-start)
+- Butuh banyak data interaksi untuk hasil optimal
 
-#### Kekurangan Model:
+## Output Top-N Rekomendasi
 
-- Kurang efektif untuk pengguna atau buku baru (cold-start).
-- Membutuhkan banyak data interaksi untuk hasil optimal.
+Berikut adalah contoh hasil rekomendasi untuk **user dengan ID = 1** berdasarkan prediksi skor tertinggi dari model:
 
-### Output Top-N Rekomendasi Collaborative Filtering
-
-Setelah model terlatih, rekomendasi buku untuk pengguna tertentu diberikan berdasarkan skor prediksi tertinggi.
-
-Misal, untuk pengguna dengan ID tertentu, Top-5 rekomendasi buku yang diprediksi disukai adalah:
-
-| Book ID  | Title                            | Predicted Score |
-|----------|---------------------------------|-----------------|
-| 2251306  | Brain Rules: 12 Principles...    | 0.87            |
-| 5989573  | Scott Pilgrim, Volume 5          | 0.85            |
-| 40024    | The Alienist                    | 0.83            |
-| 234184   | Stone of Tears                  | 0.82            |
-| 4800764  | Sweet Persuasion                | 0.80            |
+| Book ID | Judul Buku                                  | Predicted Score |
+|---------|---------------------------------------------|-----------------|
+| 760092  | Don't Waste Your Life                       | 0.9308          |
+| 161938  | Bibles: NIV Compact Navy                    | 0.9297          |
+| 223236  | My Utmost for His Highest                   | 0.9286          |
+| 460383  | Light in Shadow (Whispering Springs, #1)    | 0.9283          |
+| 311659  | Light in the Darkness: Black Holes, the Un... | 0.9266        |
 
 
 
