@@ -8,8 +8,7 @@ Salah satu pendekatan efektif dalam menyelesaikan permasalahan ini adalah memban
 
 **Referensi:**
 1. S. D. Lubis, H. H. M. Sitepu, dan D. R. Irawan, "Sistem Rekomendasi Buku Menggunakan Content-Based Filtering Pada Aplikasi Perpustakaan," *Jurnal Coscitech*, vol. 10, no. 2, 2023. [Link PDF](https://ejurnal.umri.ac.id/index.php/coscitech/article/view/5131/2462)
-2. Ricci, F., Rokach, L., & Shapira, B. (2015). *Recommender Systems Handbook*. Springer.
-3. Zając, Z. "goodbooks-10k." Kaggle. [https://www.kaggle.com/datasets/zygmunt/goodbooks-10k](https://www.kaggle.com/datasets/zygmunt/goodbooks-10k)
+2. Zając, Z. "goodbooks-10k." Kaggle. [https://www.kaggle.com/datasets/zygmunt/goodbooks-10k](https://www.kaggle.com/datasets/zygmunt/goodbooks-10k)
 
 
 
