@@ -130,40 +130,91 @@ Pada tahap ini, dilakukan beberapa proses penting untuk menyiapkan data buku dan
 8. **Perhitungan Similarity Matrix**  
    Matriks kesamaan antar buku dihitung menggunakan cosine similarity pada `feature_matrix`. Matriks similarity ini berbentuk sparse matrix berukuran (10000, 10000) untuk efisiensi memori dan akan digunakan dalam rekomendasi berbasis konten.
 
-
 ## Modeling
 
-Pada tahap pemodelan, digunakan metode **Content-Based Filtering (CBF)** untuk merekomendasikan buku berdasarkan kemiripan konten dari fitur-fitur yang tersedia. Pendekatan ini memanfaatkan matriks similarity yang dihitung dari gabungan fitur teks dan numerik, seperti judul buku (menggunakan TF-IDF), penulis, rating, dan tahun terbit, yang telah diproses pada tahap *Data Preparation*.
+Tahapan ini membahas mengenai model machine learning yang digunakan untuk menyelesaikan permasalahan rekomendasi buku. Model yang digunakan adalah **Content-Based Filtering (CBF)** yang mengandalkan kemiripan antar item berdasarkan fitur kontennya.
 
 ### Algoritma yang Digunakan
 
 - **Content-Based Filtering dengan Cosine Similarity**  
-  Matriks similarity dibangun menggunakan metode cosine similarity terhadap vektor gabungan fitur konten yang telah diproses. Fitur teks (judul) diubah ke dalam representasi numerik dengan TF-IDF, sementara fitur numerik (rating dan tahun terbit) dinormalisasi sebelum digabungkan.
+  Content-Based Filtering digunakan untuk merekomendasikan buku yang mirip dengan buku yang telah disukai pengguna berdasarkan informasi konten seperti judul, penulis, rating, dan tahun terbit. Proses dilakukan dengan menggabungkan fitur-fitur tersebut menjadi representasi vektor.
 
-### Fungsi Rekomendasi Buku
+- **TF-IDF (Term Frequency-Inverse Document Frequency)**  
+  Digunakan untuk mengubah fitur teks (judul buku) menjadi bentuk vektor numerik yang dapat digunakan dalam perhitungan similarity.
 
-Fungsi `recommend_books()` digunakan untuk menghasilkan rekomendasi berdasarkan judul buku tertentu. Fungsi ini mengembalikan daftar buku lain yang paling mirip berdasarkan skor cosine similarity.
+- **Cosine Similarity**  
+  Digunakan untuk mengukur tingkat kemiripan antar buku berdasarkan hasil transformasi vektor. Skor similarity yang dihasilkan digunakan untuk menentukan buku-buku mana yang paling mirip.
 
-Output berisi informasi sebagai berikut:
-- Judul buku
-- Penulis
-- Rating
-- Jumlah rating
-- Tahun terbit
+### Proses Pemodelan
 
-Rekomendasi dibatasi pada `top_n` buku dengan skor kemiripan tertinggi.
+1. **Ekstraksi Fitur**:  
+   - Judul buku diubah ke dalam bentuk vektor menggunakan TF-IDF.  
+   - Fitur numerik seperti rating dan tahun terbit dinormalisasi menggunakan MinMaxScaler.
+
+2. **Penggabungan Fitur**:  
+   Semua fitur yang telah diproses digabungkan menjadi satu matriks fitur utama.
+
+3. **Perhitungan Similarity**:  
+   Matriks cosine similarity dihitung berdasarkan matriks fitur gabungan tersebut.
+
+4. **Fungsi Rekomendasi**:  
+   Dibuat fungsi `recommend_books(title, top_n=10)` yang menghasilkan daftar Top-N buku dengan skor kemiripan tertinggi terhadap buku yang dicari.
+
+### Contoh Output Top-N Rekomendasi (Format Detail)
+
+Testing Content-Based dengan buku: **'The Fault in Our Stars'**
+
+======================================================================
+CONTENT-BASED RECOMMENDATIONS FOR: 'The Fault in Our Stars'
+======================================================================
+0. Looking for Alaska  
+   Author: John Green  
+   Rating: 4.09  
+--------------------------------------------------
+1. Paper Towns  
+   Author: John Green  
+   Rating: 3.88  
+--------------------------------------------------
+2. Full Dark, No Stars  
+   Author: Stephen King  
+   Rating: 4.03  
+--------------------------------------------------
+3. The City and the Stars  
+   Author: Arthur C. Clarke  
+   Rating: 4.08  
+--------------------------------------------------
+4. Agent to the Stars  
+   Author: John Scalzi  
+   Rating: 3.91  
+--------------------------------------------------
+
+> Output ini menunjukkan bahwa sistem rekomendasi berhasil merekomendasikan buku yang relevan berdasarkan kemiripan konten dengan buku "The Fault in Our Stars".
+
+### Kelebihan dan Kekurangan Algoritma
+
+**Kelebihan:**
+- Tidak memerlukan data interaksi pengguna lainnya (seperti rating orang lain).
+- Dapat memberikan rekomendasi personal berdasarkan satu buku favorit.
+
+**Kekurangan:**
+- Terbatas pada item yang sudah pernah dilihat pengguna.
+- Kurang mampu menemukan item baru (cold start problem untuk item dan pengguna baru).
 
 ## Evaluation
 
-Untuk mengevaluasi performa sistem rekomendasi Content-Based Filtering, digunakan metrik evaluasi **Precision@K**, **Recall@K**, dan **F1-Score@K** dengan nilai `K` yang divariasikan (3, 5, 10, dan 20). Evaluasi dilakukan terhadap 30 data buku yang dipilih secara acak dari dataset.
+Untuk mengevaluasi performa model rekomendasi, digunakan metrik **Precision@K**, **Recall@K**, dan **F1-Score@K**.
 
-### Penjelasan Metrik Evaluasi
+### Penjelasan Metrik
 
-- **Precision@K**: proporsi buku relevan (memiliki penulis yang sama) dari total `K` buku yang direkomendasikan.
-- **Recall@K**: proporsi buku relevan yang berhasil ditemukan dari seluruh buku relevan yang tersedia.
-- **F1-Score@K**: harmonic mean dari Precision dan Recall.
+- **Precision@K**: Proporsi item yang relevan dari seluruh Top-K rekomendasi.
+- **Recall@K**: Proporsi item relevan yang berhasil ditemukan dari seluruh item relevan yang tersedia.
+- **F1-Score@K**: Harmonic mean antara Precision@K dan Recall@K, memberikan keseimbangan antara keduanya.
+
+> Dalam konteks proyek ini, buku dikatakan relevan jika memiliki **penulis yang sama** dengan buku input.
 
 ### Hasil Evaluasi
+
+Evaluasi dilakukan terhadap 30 data buku yang dipilih secara acak. Berikut hasil evaluasinya:
 
 | K  | Precision@K | Recall@K | F1-Score@K |
 |----|-------------|----------|------------|
@@ -172,4 +223,10 @@ Untuk mengevaluasi performa sistem rekomendasi Content-Based Filtering, digunaka
 | 10 | 0.4167      | 0.5177   | 0.3814     |
 | 20 | 0.3133      | 0.6246   | 0.3540     |
 
-> Evaluasi dilakukan terhadap 30 sampel buku yang dipilih secara acak dari dataset. Nilai precision cenderung menurun seiring bertambahnya `K`, sementara recall meningkat karena cakupan rekomendasi yang lebih luas.
+> Nilai precision menurun seiring bertambahnya `K` karena cakupan rekomendasi yang lebih luas, sedangkan recall meningkat karena semakin banyak buku relevan yang berhasil ditangkap.
+
+### Kesimpulan Evaluasi
+
+- Model memberikan hasil yang cukup baik dalam menemukan buku dengan penulis yang sama.
+- Model sangat cocok untuk pengguna yang ingin menemukan buku lain dari penulis favoritnya.
+- Untuk meningkatkan akurasi, penggabungan dengan pendekatan lain seperti collaborative filtering bisa menjadi alternatif selanjutnya.
