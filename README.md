@@ -50,9 +50,8 @@ Dataset ini terdiri dari lima file utama yang saling terhubung:
 | Dataset           | Jumlah Data          | Keterangan                        |
 |-------------------|----------------------|---------------------------------|
 | books             | 10.000 buku          | Data buku                       |
-| book_tags         | 10.000 buku          | Tag yang terkait pada buku      |
+| book_tags         | 999.912 buku          | Tag yang terkait pada buku      |
 | ratings           | 981.756 penilaian    | Rating pengguna                 |
-| pengguna (ratings) | 53.424 pengguna unik | Jumlah pengguna pemberi rating |
 | tags              | 34.252 tag           | Daftar tag yang tersedia        |
 | to_read           | 912.705 daftar baca  | Buku yang akan dibaca pengguna  |
 
@@ -134,70 +133,43 @@ Pada tahap ini, dilakukan beberapa proses penting untuk menyiapkan data buku dan
 
 ## Modeling
 
-Pada tahap pemodelan ini, digunakan metode **Content-Based Filtering** untuk merekomendasikan buku berdasarkan kemiripan konten dari fitur buku yang tersedia. Proses ini menggunakan matriks similarity yang dihitung dari fitur konten buku, seperti judul, penulis, rating, dan tahun terbit yang sudah diproses pada tahap Data Preparation.
+Pada tahap pemodelan, digunakan metode **Content-Based Filtering (CBF)** untuk merekomendasikan buku berdasarkan kemiripan konten dari fitur-fitur yang tersedia. Pendekatan ini memanfaatkan matriks similarity yang dihitung dari gabungan fitur teks dan numerik, seperti judul buku (menggunakan TF-IDF), penulis, rating, dan tahun terbit, yang telah diproses pada tahap *Data Preparation*.
 
 ### Algoritma yang Digunakan
 
 - **Content-Based Filtering dengan Cosine Similarity**  
-  Matriks similarity dihitung dengan metode cosine similarity pada fitur buku yang sudah diolah (termasuk TF-IDF dari judul dan fitur numerik yang sudah diskalakan).
+  Matriks similarity dibangun menggunakan metode cosine similarity terhadap vektor gabungan fitur konten yang telah diproses. Fitur teks (judul) diubah ke dalam representasi numerik dengan TF-IDF, sementara fitur numerik (rating dan tahun terbit) dinormalisasi sebelum digabungkan.
 
 ### Fungsi Rekomendasi Buku
 
-- Fungsi `get_book_recommendations` menerima judul buku sebagai input dan mengembalikan daftar rekomendasi buku yang paling mirip berdasarkan similarity score.
-- Fungsi ini juga menampilkan informasi tambahan seperti penulis, rating rata-rata, jumlah rating, dan tahun terbit buku rekomendasi.
-- Rekomendasi dibatasi pada jumlah `n` buku teratas dengan skor similarity tertinggi (default 5 buku).
+Fungsi `recommend_books()` digunakan untuk menghasilkan rekomendasi berdasarkan judul buku tertentu. Fungsi ini mengembalikan daftar buku lain yang paling mirip berdasarkan skor cosine similarity.
 
-### Evaluasi Model
+Output berisi informasi sebagai berikut:
+- Judul buku
+- Penulis
+- Rating
+- Jumlah rating
+- Tahun terbit
 
-- Dilakukan evaluasi menggunakan metrik **Precision@K**, dengan `k=5` buku rekomendasi.
-- Precision diukur dengan membandingkan apakah penulis buku rekomendasi sama dengan penulis buku yang dicari (karena dalam content-based filtering, buku dengan penulis sama biasanya relevan).
-- Evaluasi dilakukan pada sample buku sebanyak 30 data secara acak.
-- Hasil evaluasi menunjukkan nilai rata-rata precision@5 yang memberikan gambaran performa sistem rekomendasi.
-
-### Kelebihan dan Kekurangan Content-Based Filtering
-
-| Kelebihan                                             | Kekurangan                                                |
-|------------------------------------------------------|-----------------------------------------------------------|
-| - Mudah dipahami dan diimplementasikan                | - Tidak dapat merekomendasikan buku yang sangat berbeda    |
-| - Rekomendasi personal sesuai konten buku yang dipilih| - Rentan terhadap masalah *cold-start* pada buku baru      |
-| - Tidak tergantung pada data rating pengguna yang besar| - Kemampuan eksplorasi terbatas karena hanya berdasarkan konten|
-
-### Proses Improvement
-
-- Untuk meningkatkan performa, bisa dilakukan hyperparameter tuning pada TF-IDF vectorizer seperti jumlah fitur maksimum, penggunaan n-gram, dan penghilangan stopwords.
-- Selain itu, normalisasi fitur numerik juga dapat disesuaikan agar memberikan bobot yang optimal pada fitur tertentu.
-- Namun, dalam implementasi ini, model sederhana sudah cukup sebagai baseline dan fokus utama adalah pada integrasi fitur konten dan evaluasi precision.
+Rekomendasi dibatasi pada `top_n` buku dengan skor kemiripan tertinggi.
 
 ## Evaluation
 
-Pada proyek rekomendasi buku berbasis content-based filtering ini, metrik evaluasi yang digunakan adalah **Precision@K** dengan K=5. Metrik ini dipilih karena sesuai dengan konteks problem statement, yaitu sistem rekomendasi yang bertujuan memberikan daftar rekomendasi buku yang relevan dan tepat berdasarkan buku yang dicari pengguna.
+Untuk mengevaluasi performa sistem rekomendasi Content-Based Filtering, digunakan metrik evaluasi **Precision@K**, **Recall@K**, dan **F1-Score@K** dengan nilai `K` yang divariasikan (3, 5, 10, dan 20). Evaluasi dilakukan terhadap 30 data buku yang dipilih secara acak dari dataset.
 
-### Penjelasan Metrik Precision@K
+### Penjelasan Metrik Evaluasi
 
-- **Precision@K** mengukur proporsi item yang direkomendasikan dalam top-K hasil yang relevan dengan kebutuhan pengguna.  
-- Dalam konteks ini, "relevan" diartikan sebagai buku-buku yang memiliki penulis (authors) yang sama dengan buku input (query), karena sistem merekomendasikan buku berdasarkan kemiripan konten (content-based filtering).
-- Formula Precision@K:
-
-\[
-Precision@K = \frac{\text{Jumlah rekomendasi relevan dalam top-K}}{K}
-\]
-
-- Nilai Precision@K berkisar dari 0 hingga 1, dimana 1 berarti semua rekomendasi dalam top-K relevan, dan 0 berarti tidak ada rekomendasi relevan sama sekali.
+- **Precision@K**: proporsi buku relevan (memiliki penulis yang sama) dari total `K` buku yang direkomendasikan.
+- **Recall@K**: proporsi buku relevan yang berhasil ditemukan dari seluruh buku relevan yang tersedia.
+- **F1-Score@K**: harmonic mean dari Precision dan Recall.
 
 ### Hasil Evaluasi
 
-Berdasarkan evaluasi dengan sampel 30 buku dan K=5, didapatkan hasil:
+| K  | Precision@K | Recall@K | F1-Score@K |
+|----|-------------|----------|------------|
+| 3  | 0.5778      | 0.3245   | 0.3438     |
+| 5  | 0.5200      | 0.4196   | 0.3846     |
+| 10 | 0.4167      | 0.5177   | 0.3814     |
+| 20 | 0.3133      | 0.6246   | 0.3540     |
 
-- **Average Precision@5: 0.2333**  
-  Artinya, secara rata-rata dari 5 rekomendasi yang diberikan, sekitar 23,33% atau sekitar 1 hingga 2 buku dari 5 rekomendasi memiliki penulis yang sama dengan buku query.
-
-- **Range Precision: 0.0 sampai 1.0**  
-  Ini menunjukkan variasi rekomendasi, ada beberapa buku yang mendapat rekomendasi sangat relevan (precision 1.0), dan ada juga yang kurang relevan (precision 0.0).
-
-- Evaluasi ini dilakukan pada 30 sampel buku yang diambil secara acak dari dataset.
-
-### Interpretasi Hasil
-
-- Nilai Precision@5 sebesar 0.2333 menunjukkan bahwa model content-based filtering memberikan rekomendasi yang cukup baik namun masih bisa ditingkatkan.  
-- Karena model ini menggunakan kemiripan berbasis konten (seperti fitur teks atau metadata buku), hasil yang ada sudah menggambarkan bahwa model mampu menemukan buku dengan kemiripan, tapi belum sepenuhnya kuat dalam mengidentifikasi buku yang benar-benar relevan dari sisi penulis.  
-- Precision@K yang tidak terlalu tinggi dapat dipengaruhi oleh banyak faktor seperti fitur yang digunakan, kualitas data, atau cara perhitungan similarity.
+> Evaluasi dilakukan terhadap 30 sampel buku yang dipilih secara acak dari dataset. Nilai precision cenderung menurun seiring bertambahnya `K`, sementara recall meningkat karena cakupan rekomendasi yang lebih luas.
