@@ -162,33 +162,41 @@ Tahapan ini membahas mengenai model machine learning yang digunakan untuk menyel
 
 ### Contoh Output Top-N Rekomendasi (Format Detail)
 
-Testing Content-Based dengan buku: **'The Fault in Our Stars'**
+**Testing Content-Based dengan buku: 'The Fault in Our Stars'**
 
-======================================================================
-CONTENT-BASED RECOMMENDATIONS FOR: 'The Fault in Our Stars'
-======================================================================
-0. Looking for Alaska  
-   Author: John Green  
-   Rating: 4.09  
---------------------------------------------------
-1. Paper Towns  
-   Author: John Green  
-   Rating: 3.88  
---------------------------------------------------
-2. Full Dark, No Stars  
-   Author: Stephen King  
-   Rating: 4.03  
---------------------------------------------------
-3. The City and the Stars  
-   Author: Arthur C. Clarke  
-   Rating: 4.08  
---------------------------------------------------
-4. Agent to the Stars  
-   Author: John Scalzi  
-   Rating: 3.91  
---------------------------------------------------
+Rekomendasi buku mirip:
 
-> Output ini menunjukkan bahwa sistem rekomendasi berhasil merekomendasikan buku yang relevan berdasarkan kemiripan konten dengan buku "The Fault in Our Stars".
+0. *Looking for Alaska*  
+   Penulis: John Green  
+   Rating: 4.09
+
+---
+
+1. *Paper Towns*  
+   Penulis: John Green  
+   Rating: 3.88
+
+---
+
+2. *Full Dark, No Stars*  
+   Penulis: Stephen King  
+   Rating: 4.03
+
+---
+
+3. *The City and the Stars*  
+   Penulis: Arthur C. Clarke  
+   Rating: 4.08
+
+---
+
+4. *Agent to the Stars*  
+   Penulis: John Scalzi  
+   Rating: 3.91
+
+---
+
+Output ini menunjukkan sistem rekomendasi mampu menemukan buku yang mirip berdasarkan fitur konten buku 'The Fault in Our Stars'.
 
 ### Kelebihan dan Kekurangan Algoritma
 
